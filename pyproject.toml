@@ -1,0 +1,15 @@
+[project]
+name = "codecad"
+version = "0.1.0"
+requires-python = ">=3.13"
+dependencies = [
+    "build123d>=0.13.0",
+    "ocp-vscode>=4.2.0",
+]
+
+[dependency-groups]
+dev = [
+    "ipykernel>=7.4.0",
+    "pyvista>=0.49.2",
+    "pyvista-cad>=0.1.2",
+]
