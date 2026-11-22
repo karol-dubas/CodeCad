@@ -11,7 +11,6 @@ from build123d import (
     Part,
     Plane,
     Polygon,
-    Pos,
     RectangleRounded,
     Sketch,
     ThreePointArc,
@@ -19,7 +18,6 @@ from build123d import (
     extrude,
     fillet,
     make_face,
-    mirror,
 )
 from ocp_vscode import show
 
@@ -40,15 +38,14 @@ TOP_Z = CENTER_Z + 12.0  # 142.0 mm (lip height to cradle the handle)
 # X dimensions (along the handle axis)
 TOP_WIDTH = 122.0  # Fits inside 127 mm handle with 2.5 mm margin per side
 HAND_GAP = 90.0  # Clear space at the top/middle for the hand
-INNER_BOTTOM_GAP = 50.0  # Inner flare (+20 mm per side at base)
-OUTER_BASE_WIDTH = 162.0  # Outer flare (+20 mm per side at base)
+INNER_BOTTOM_GAP = 54.0  # Inner flare (+18 mm per side at base)
+OUTER_BASE_WIDTH = 158.0  # Outer flare (+18 mm per side at base)
 GUSSET_TOP_Z = 72.0  # Height where inner/outer buttresses start flaring
-BRIDGE_H = 16.0  # Solid flat floor bridge thickness
+BRIDGE_H = 14.0  # Solid flat floor bridge thickness
 
 # Y dimensions (front-to-back depth for stability)
 BASE_DEPTH = 140.0  # Footprint depth on the floor
 TOP_DEPTH = 56.0  # Depth at the top of the towers
-RIB_WALL = 16.0  # Front and back sloped flange thickness on the buttresses
 
 
 def _require_sketch(builder: BuildSketch) -> Sketch:
@@ -87,7 +84,7 @@ def make_dumbbell_stand() -> Part:
         outer_bend_verts = outer_xz_sk.vertices().filter_by_position(
             Axis.Y, BRIDGE_H - 1.0, GUSSET_TOP_Z + 1.0
         )
-        fillet(outer_bend_verts, radius=18.0)
+        fillet(outer_bend_verts, radius=20.0)
 
     outer_envelope = extrude(_require_sketch(outer_xz_sk), amount=BASE_DEPTH, both=True)
     body = body & outer_envelope
@@ -114,7 +111,7 @@ def make_dumbbell_stand() -> Part:
     )
     body = fillet(saddle_top_edges, radius=4.0)
 
-    # 4. Inner hand clearance + inner buttress profile (XZ plane)
+    # 4. Inner hand clearance + smooth inner buttress profile (XZ plane)
     with BuildSketch(Plane.XZ) as gap_sk:
         Polygon(
             (-HAND_GAP / 2.0, TOP_Z + 10.0),
@@ -128,56 +125,29 @@ def make_dumbbell_stand() -> Part:
         inner_verts = gap_sk.vertices().filter_by_position(
             Axis.Y, BRIDGE_H - 1.0, GUSSET_TOP_Z + 1.0
         )
-        fillet(inner_verts, radius=18.0)
+        fillet(inner_verts, radius=20.0)
 
     gap_cut = extrude(_require_sketch(gap_sk), amount=BASE_DEPTH, both=True)
     body = body - gap_cut
 
-    # 5. Pocket out the middle web of both inner and outer buttresses
-    with BuildSketch(Plane.YZ) as pocket_yz:
-        with BuildLine():
-            p1 = (-BASE_DEPTH / 2.0 + RIB_WALL, BRIDGE_H)
-            p2 = (BASE_DEPTH / 2.0 - RIB_WALL, BRIDGE_H)
-            p3 = (TOP_DEPTH / 2.0 - RIB_WALL, TOP_Z)
-            p4 = (-TOP_DEPTH / 2.0 + RIB_WALL, TOP_Z)
-            Line(p1, p2)
-            Line(p2, p3)
-            Line(p3, p4)
-            Line(p4, p1)
-        make_face()
-        bot_p_verts = pocket_yz.vertices().filter_by_position(
-            Axis.Y, BRIDGE_H - 1.0, BRIDGE_H + 1.0
-        )
-        fillet(bot_p_verts, radius=10.0)
-
-    pocket_sketch = _require_sketch(pocket_yz)
-    inner_pocket = extrude(pocket_sketch, amount=HAND_GAP / 2.0 - 2.0, both=True)
-    body = body - inner_pocket
-
-    outer_pocket_pos = Pos(TOP_WIDTH / 2.0 + 2.0, 0.0, 0.0) * extrude(
-        pocket_sketch, amount=OUTER_BASE_WIDTH
-    )
-    outer_pocket_neg = mirror(outer_pocket_pos, about=Plane.YZ)
-    body = body - outer_pocket_pos - outer_pocket_neg
-
-    # 6. Side weight-saving triangular window in the towers (YZ plane)
-    # Steep ~64° roof with sharp/micro-filleted apex avoids >60° ceiling overhang
+    # 5. Clean side A-frame triangular window through towers & buttresses (YZ plane)
+    # Steep ~61 deg roof with sharp apex prints completely support-free
     with BuildSketch(Plane.YZ) as window_sk:
-        Polygon((-32.0, 26.0), (32.0, 26.0), (0.0, 92.0), align=None)
-        win_bot_verts = window_sk.vertices().filter_by_position(Axis.Y, 25.0, 27.0)
-        fillet(win_bot_verts, radius=8.0)
+        Polygon((-38.0, 22.0), (38.0, 22.0), (0.0, 92.0), align=None)
+        win_bot_verts = window_sk.vertices().filter_by_position(Axis.Y, 21.0, 23.0)
+        fillet(win_bot_verts, radius=10.0)
 
     window_cut = extrude(_require_sketch(window_sk), amount=OUTER_BASE_WIDTH, both=True)
     body = body - window_cut
 
-    # 7. Center weight-saving window in the flat base
+    # 6. Center weight-saving window in the flat base
     with BuildSketch(Plane.XY) as base_cut_sk:
-        RectangleRounded(INNER_BOTTOM_GAP - 6.0, BASE_DEPTH - 2.0 * 32.0, radius=12.0)
+        RectangleRounded(INNER_BOTTOM_GAP - 6.0, BASE_DEPTH - 2.0 * 28.0, radius=12.0)
 
     base_window = extrude(_require_sketch(base_cut_sk), amount=BRIDGE_H + 5.0)
     body = body - base_window
 
-    # 8. Fillet all sharp edges above Z=0 (excluding the triangular window apex to keep it support-free)
+    # 7. Fillet all sharp edges above Z=0 (excluding the triangular window apex to keep it support-free)
     bottom_edges = set(body.faces().sort_by(Axis.Z)[0].edges())
     window_apex_edges = set(
         body.edges()
@@ -188,7 +158,7 @@ def make_dumbbell_stand() -> Part:
     edges_to_fillet = [
         e for e in body.edges() if e not in bottom_edges and e not in window_apex_edges
     ]
-    finished = fillet(edges_to_fillet, radius=1.5)
+    finished = fillet(edges_to_fillet, radius=2.0)
     assert isinstance(finished, Part)
     return finished
 

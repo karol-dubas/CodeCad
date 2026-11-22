@@ -1,7 +1,7 @@
 {
   "part_name": "dumbbell_stand",
   "script_path": "projects/dumbbell_stand/dumbbell_stand.py",
-  "timestamp": "2026-11-22T15:32:54",
+  "timestamp": "2026-11-22T15:57:10",
   "overall_status": "PASS",
   "checks": {
     "geometry_sanity": {
@@ -10,20 +10,20 @@
       "metrics": {
         "valid_brep": true,
         "solid_count": 1,
-        "volume_mm3": 670495.14
+        "volume_mm3": 699876.98
       }
     },
     "build_volume": {
       "status": "PASS",
-      "message": "Fits comfortably inside Bambu Lab P1S build volume (max occupancy 63.3%).",
+      "message": "Fits comfortably inside Bambu Lab P1S build volume (max occupancy 61.7%).",
       "metrics": {
         "size_mm": [
-          162.0,
+          158.0,
           140.0,
           142.0
         ],
         "occupancy_pct": [
-          63.3,
+          61.7,
           54.7,
           55.5
         ]
@@ -31,9 +31,9 @@
     },
     "bed_adhesion": {
       "status": "PASS",
-      "message": "Flat bottom at Z=-0.00 mm with 194.58 cm^2 bed contact area.",
+      "message": "Flat bottom at Z=-0.00 mm with 182.08 cm^2 bed contact area.",
       "metrics": {
-        "contact_area_cm2": 194.576,
+        "contact_area_cm2": 182.08,
         "z_min_mm": -0.0
       }
     },
@@ -54,11 +54,11 @@
     },
     "wall_thickness": {
       "status": "PASS",
-      "message": "Robust wall thickness (min=11.03 mm, P5=13.58 mm, median=20.05 mm).",
+      "message": "Robust wall thickness (min=12.70 mm, P5=16.00 mm, median=19.14 mm).",
       "metrics": {
-        "min_mm": 11.03,
-        "p5_mm": 13.58,
-        "p50_mm": 20.05
+        "min_mm": 12.7,
+        "p5_mm": 16.0,
+        "p50_mm": 19.14
       }
     },
     "stability": {
@@ -79,26 +79,26 @@
   "geometry": {
     "valid_brep": true,
     "solid_count": 1,
-    "face_count": 298,
-    "edge_count": 688,
-    "volume_mm3": 670495.14,
-    "volume_cm3": 670.495,
-    "surface_area_mm2": 103074.56,
-    "surface_area_cm2": 1030.746
+    "face_count": 203,
+    "edge_count": 478,
+    "volume_mm3": 699876.98,
+    "volume_cm3": 699.877,
+    "surface_area_mm2": 95525.63,
+    "surface_area_cm2": 955.256
   },
   "bounding_box": {
     "min_mm": [
-      -81.0,
+      -79.0,
       -70.0,
       -0.0
     ],
     "max_mm": [
-      81.0,
+      79.0,
       70.0,
       142.0
     ],
     "size_mm": [
-      162.0,
+      158.0,
       140.0,
       142.0
     ],
@@ -109,12 +109,12 @@
       256.0
     ],
     "margin_to_limits_mm": [
-      94.0,
+      98.0,
       116.0,
       114.0
     ],
     "occupancy_pct": [
-      63.3,
+      61.7,
       54.7,
       55.5
     ],
@@ -123,8 +123,8 @@
   "bed_adhesion": {
     "z_min_mm": -0.0,
     "bed_flatness_at_z0": true,
-    "contact_area_mm2": 19457.6,
-    "contact_area_cm2": 194.576,
+    "contact_area_mm2": 18208.03,
+    "contact_area_cm2": 182.08,
     "fillets_touching_build_plate_count": 0,
     "fillets_touching_build_plate_radii_mm": []
   },
@@ -139,13 +139,13 @@
       "critical_red_below": 0.8,
       "warning_amber_below": 1.6
     },
-    "min_mm": 11.031,
+    "min_mm": 12.697,
     "percentiles_mm": {
-      "p5": 13.584,
-      "p10": 16.0,
-      "p50_median": 20.051,
-      "p90": 39.121,
-      "max": 161.427
+      "p5": 16.0,
+      "p10": 16.039,
+      "p50_median": 19.136,
+      "p90": 50.977,
+      "max": 157.97
     },
     "distribution_area_pct": {
       "red_lt_0.8mm": 0.0,
@@ -157,11 +157,11 @@
     "center_of_mass_mm": [
       0.0,
       -0.0,
-      37.967
+      37.914
     ],
     "footprint_bounds_xy_mm": [
-      -81.0,
-      81.0,
+      -79.0,
+      79.0,
       -70.0,
       70.0
     ],
@@ -171,8 +171,8 @@
     "cylindrical_diameters_mm": [],
     "fillet_and_arc_radii_mm": [
       {
-        "radius_mm": 1.5,
-        "face_count": 104
+        "radius_mm": 2.0,
+        "face_count": 66
       },
       {
         "radius_mm": 4.0,
@@ -183,12 +183,8 @@
         "face_count": 4
       },
       {
-        "radius_mm": 8.0,
-        "face_count": 4
-      },
-      {
         "radius_mm": 10.0,
-        "face_count": 8
+        "face_count": 4
       },
       {
         "radius_mm": 12.0,
@@ -199,29 +195,23 @@
         "face_count": 2
       },
       {
-        "radius_mm": 18.0,
-        "face_count": 14
+        "radius_mm": 20.0,
+        "face_count": 12
       }
     ],
     "distinct_circular_edge_radii_mm": [
-      1.5,
-      2.5,
+      2.0,
       4.0,
-      4.5,
       6.0,
-      8.0,
-      8.5,
-      9.5,
-      10.0,
       12.0,
-      13.5,
+      14.0,
       14.75,
-      16.25
+      16.75
     ],
     "horizontal_planar_z_levels_mm": [
       0.0,
-      16.0,
-      26.0,
+      14.0,
+      22.0,
       142.0
     ]
   },
