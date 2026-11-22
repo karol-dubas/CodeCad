@@ -1,14 +1,19 @@
-- The user designs interactively in VS Code using OCP CAD Viewer.
-- Always use `uv run ...`.
-- User uses Orca Slicer to print 3D models on a Bambu Lab P1S (`256 x 256 x 256 mm`).
-- Export models only as `.step` files (do not export `.stl`).
-- Optimize all models for FDM 3D printing: account for FDM constraints and challenges (avoid supports, minimize overhangs >45° and long bridges, prefer 45° chamfers over fillets on the `Z=0` build plate, ensure stable bed adhesion, align layer orientation with mechanical stress, avoid sharp internal corners that concentrate stress, and include proper dimensional tolerances) while minimizing material usage (use hollowing, ribbing, or cutouts instead of solid bulky volumes where structurally sound).
-- If you're creating several versions of a model for the user to review, organize them into separate folders.
-- Maintain a concise engineering specification file (`<project_dir>/README.md`):
-  - Immediately record and keep updated only external ground-truth context that cannot be derived from the repository: user requirements, real-world physical measurements, mating part dimensions, load/environmental constraints, and key architectural choices.
-  - Single Source of Truth: Never duplicate global rules from `AGENTS.md`, code details from `<project>.py` files, or generated metrics from reports.
-- CAD & FDM Inspection Pipeline (`uv run preview.py <script_path>`):
-  Run after every `build123d` geometry change to validate B-Rep integrity, spatial topology, and FDM printability. The pipeline deterministically outputs 3 files in `<project_dir>/.preview/`:
-  1. `report.json` (Symbolic Ground Truth): Read this FIRST for exact dimensions, feature catalogs, `PASS`/`WARN`/`FAIL` checks, Set-of-Mark (`[D1]`, `[D2]`) defect cluster coordinates, and optional headless OrcaSlicer G-code metrics (`--slice`) — never OCR numbers from 3D renders.
-  2. `preview.png` (2x2 Parallel-Projection 3D Spatial, DFM & Smart Cutaway Sheet): Open and inspect visually for 360° exterior topology (Front-Right-Top, Back-Left-Top, Underside) with unified DFM coloring (`#5B7C99` Safe Steel-Blue, `#0284C7` Bed Contact Blue, `#F59E0B` 45–60° Overhang Amber, `#EF4444` >60° Overhang Red), Set-of-Mark `[D1]` defect badges, and Panel 4's 4-in-1 Smart Cutaway (`A-A` section cap + fixed-threshold Wall Thickness heatmap + translucent Ghost Context + Center-of-Mass plumb line).
-  3. `preview_engineering.png` (2x2 Pure 2D Vector Orthographic HLR & Hatched Section Sheet): Inspect ISO-aligned `Top (XY)`, `Front (XZ)`, and `Right (YZ)` Hidden-Line-Removal views and Panel 2's 45°-hatched planar B-Rep Cross-Section `A-A` (`///`) on a millimeter coordinate grid to verify internal wall thicknesses, hole alignments, and Z step heights.
+# CodeCad — Repository Rules
+
+- **Purpose**: Parametric 3D models (`build123d`) for FDM 3D printing on a **Bambu Lab P1S** sliced in **OrcaSlicer**. Interactive viewer: VS Code + OCP CAD Viewer.
+- **Toolchain**: Always execute commands with `uv run ...` (never bare `python` or `pip`). Export `.step` files only (never `.stl`).
+- **Single Source of Truth (SSoT)**:
+  - Code and configuration (`pyproject.toml`, `.agents/guardrails.py`, `preview_pipeline/models.py`) are the sole source of truth for numeric thresholds, file-size limits, colors, linter/type rules, and printer constants.
+  - `<project_dir>/README.md` records **only** external ground-truth context that cannot be derived from code: user requirements, physical mating measurements, load/environmental constraints, and key design decisions.
+  - **Flow Direction**: External specs are written into `<project_dir>/README.md` **first**, and code is generated from them (`README.md -> Code`). Never copy back code parameters, config flags, linter rule codes, numeric constants, or report metrics into documentation.
+- **Progressive Disclosure**:
+  - Keep this file concise with global invariants only.
+  - Before writing or editing any `build123d` CAD geometry, load and follow `.agents/skills/build123d-fdm/SKILL.md` (which contains `build123d` Algebra/Sketch patterns, anti-TNP rules, FDM tolerances, and a reference to `references/harness_engineering.md`).
+- **Strict Quality & Modularity (Warnings = Errors)**:
+  - Obey the per-file line limit enforced by `.agents/guardrails.py` (`MAX_PYTHON_LINES`) and split logic into focused modules.
+  - Full type annotations, explicit imports (no `import *`), zero linter/type-checker warnings (`pyproject.toml`), and zero non-`PASS` DFM statuses in `report.json`.
+  - Organize multiple design versions into separate folders.
+- **CAD & Compliance Verification Pipeline**:
+  - After every geometry change, run `uv run preview.py <script_path>` (add `--slice` for OrcaSlicer G-code telemetry).
+  - Read `<project_dir>/.preview/report.json` **first** for exact numbers and `PASS`/`WARN`/`FAIL` checks (Zero-OCR policy), then visually inspect `preview.png` and `preview_engineering.png`.
+  - After completing workspace edits, run a fresh-context `Repo Compliance Reviewer` subagent per `.agents/skills/repo-reviewer/SKILL.md`.

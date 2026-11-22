@@ -1,0 +1,23 @@
+{
+  "codecad-guardrails": {
+    "PreToolUse": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "uv run python guardrails.py",
+            "timeout": 15
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "type": "command",
+        "command": "uv run python guardrails.py",
+        "timeout": 60
+      }
+    ]
+  }
+}
