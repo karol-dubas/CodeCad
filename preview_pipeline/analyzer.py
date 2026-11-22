@@ -18,6 +18,7 @@ from preview_pipeline.geometry import (
     extract_spatial_clusters,
     select_smart_section_cut,
 )
+from preview_pipeline.loader import to_repo_relative_posix
 from preview_pipeline.models import (
     BUILD_VOL_MM,
     MIN_OVERHANG_CLUSTER_MM2,
@@ -149,6 +150,11 @@ def analyze_model(
     wall_class[is_wall_crit] = 2.0
     poly.cell_data["WallClass"] = wall_class
 
+    overhang_defect = np.zeros(poly.n_cells, dtype=float)
+    overhang_defect[is_amber] = 1.0
+    overhang_defect[is_red] = 2.0
+    poly.cell_data["CutawayClass"] = np.maximum(wall_class, overhang_defect)
+
     valid_th = thickness[valid_mask] if np.any(valid_mask) else thickness
     wall_min = float(np.min(valid_th))
     wall_p5 = float(np.percentile(valid_th, 5))
@@ -170,6 +176,8 @@ def analyze_model(
         wall_amber_pct,
         wall_p5,
         amber_cm2,
+        wall_red_pct=wall_red_pct,
+        red_cm2=red_cm2,
     )
     section_spec = select_smart_section_cut(
         shape, (xmin, ymin, zmin), (xmax, ymax, zmax), defect_markers
@@ -207,7 +215,7 @@ def analyze_model(
 
     report = CadReport(
         name=name,
-        script_path=str(script_path.resolve()),
+        script_path=to_repo_relative_posix(script_path),
         timestamp=datetime.now().isoformat(timespec="seconds"),
         overall_status=overall,
         valid_brep=valid_brep,

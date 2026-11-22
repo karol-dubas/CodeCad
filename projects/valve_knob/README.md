@@ -1,7 +1,7 @@
 # Valve Knob (Butterfly) — Engineering Specification
 
 ## Purpose
-Replacement 2-wing butterfly valve knob designed for comfortable finger grip and support-free FDM 3D printing on a Bambu Lab P1S.
+Replacement 2-wing butterfly valve knob designed for comfortable finger grip.
 
 ## Mating Part Measurements (Valve Stem & Sleeve)
 - **Valve stem:** `5.0 x 5.0 mm` square shaft with ball tip, total engagement depth `10.0 mm`

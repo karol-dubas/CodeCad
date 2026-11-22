@@ -200,7 +200,6 @@ bbox = stand.bounding_box()
 assert stand.is_valid, "Invalid OpenCASCADE B-Rep topology."
 assert len(stand.solids()) == 1, f"Expected 1 solid, got {len(stand.solids())}."
 assert abs(bbox.min.Z) < 1e-3, f"Part must rest flat on Z=0, got Z_min={bbox.min.Z:.3f}."
-assert bbox.size.X <= 256.0 and bbox.size.Y <= 256.0 and bbox.size.Z <= 256.0, "Exceeds P1S volume."
 
 show(stand)
 

@@ -1,0 +1,234 @@
+{
+  "part_name": "dumbbell_stand",
+  "script_path": "projects/dumbbell_stand/dumbbell_stand.py",
+  "timestamp": "2026-11-22T15:32:54",
+  "overall_status": "PASS",
+  "checks": {
+    "geometry_sanity": {
+      "status": "PASS",
+      "message": "Valid single-solid manifold B-Rep with non-zero volume.",
+      "metrics": {
+        "valid_brep": true,
+        "solid_count": 1,
+        "volume_mm3": 670495.14
+      }
+    },
+    "build_volume": {
+      "status": "PASS",
+      "message": "Fits comfortably inside Bambu Lab P1S build volume (max occupancy 63.3%).",
+      "metrics": {
+        "size_mm": [
+          162.0,
+          140.0,
+          142.0
+        ],
+        "occupancy_pct": [
+          63.3,
+          54.7,
+          55.5
+        ]
+      }
+    },
+    "bed_adhesion": {
+      "status": "PASS",
+      "message": "Flat bottom at Z=-0.00 mm with 194.58 cm^2 bed contact area.",
+      "metrics": {
+        "contact_area_cm2": 194.576,
+        "z_min_mm": -0.0
+      }
+    },
+    "build_plate_fillets": {
+      "status": "PASS",
+      "message": "No overhanging fillets detected on the Z_min build plate interface.",
+      "metrics": {
+        "fillet_face_count": 0
+      }
+    },
+    "overhangs": {
+      "status": "PASS",
+      "message": "Support-free FDM geometry (0.00 cm^2 >60 deg, 0.00 cm^2 45-60 deg).",
+      "metrics": {
+        "red_gt_60_cm2": 0.0,
+        "amber_45_60_cm2": 0.0
+      }
+    },
+    "wall_thickness": {
+      "status": "PASS",
+      "message": "Robust wall thickness (min=11.03 mm, P5=13.58 mm, median=20.05 mm).",
+      "metrics": {
+        "min_mm": 11.03,
+        "p5_mm": 13.58,
+        "p50_mm": 20.05
+      }
+    },
+    "stability": {
+      "status": "PASS",
+      "message": "Stable upright posture (tip margin: 70.0 mm).",
+      "metrics": {
+        "tip_margin_mm": 70.0
+      }
+    }
+  },
+  "defect_markers": [],
+  "section_cut_a_a": {
+    "plane_axis": "X",
+    "coordinate_mm": 53.0,
+    "projection_axes": "YZ",
+    "selection_reason": "Feature Plane (X = 53.0)"
+  },
+  "geometry": {
+    "valid_brep": true,
+    "solid_count": 1,
+    "face_count": 298,
+    "edge_count": 688,
+    "volume_mm3": 670495.14,
+    "volume_cm3": 670.495,
+    "surface_area_mm2": 103074.56,
+    "surface_area_cm2": 1030.746
+  },
+  "bounding_box": {
+    "min_mm": [
+      -81.0,
+      -70.0,
+      -0.0
+    ],
+    "max_mm": [
+      81.0,
+      70.0,
+      142.0
+    ],
+    "size_mm": [
+      162.0,
+      140.0,
+      142.0
+    ],
+    "printer_name": "Bambu Lab P1S",
+    "printer_build_volume_mm": [
+      256.0,
+      256.0,
+      256.0
+    ],
+    "margin_to_limits_mm": [
+      94.0,
+      116.0,
+      114.0
+    ],
+    "occupancy_pct": [
+      63.3,
+      54.7,
+      55.5
+    ],
+    "near_or_exceeds_limits": false
+  },
+  "bed_adhesion": {
+    "z_min_mm": -0.0,
+    "bed_flatness_at_z0": true,
+    "contact_area_mm2": 19457.6,
+    "contact_area_cm2": 194.576,
+    "fillets_touching_build_plate_count": 0,
+    "fillets_touching_build_plate_radii_mm": []
+  },
+  "overhangs": {
+    "moderate_45_to_60_deg_mm2": 0.0,
+    "moderate_45_to_60_deg_cm2": 0.0,
+    "critical_gt_60_deg_mm2": 0.0,
+    "critical_gt_60_deg_cm2": 0.0
+  },
+  "wall_thickness": {
+    "thresholds_mm": {
+      "critical_red_below": 0.8,
+      "warning_amber_below": 1.6
+    },
+    "min_mm": 11.031,
+    "percentiles_mm": {
+      "p5": 13.584,
+      "p10": 16.0,
+      "p50_median": 20.051,
+      "p90": 39.121,
+      "max": 161.427
+    },
+    "distribution_area_pct": {
+      "red_lt_0.8mm": 0.0,
+      "amber_0.8_to_1.6mm": 0.0,
+      "ok_gt_1.6mm": 100.0
+    }
+  },
+  "stability": {
+    "center_of_mass_mm": [
+      0.0,
+      -0.0,
+      37.967
+    ],
+    "footprint_bounds_xy_mm": [
+      -81.0,
+      81.0,
+      -70.0,
+      70.0
+    ],
+    "min_tipping_margin_mm": 70.0
+  },
+  "features": {
+    "cylindrical_diameters_mm": [],
+    "fillet_and_arc_radii_mm": [
+      {
+        "radius_mm": 1.5,
+        "face_count": 104
+      },
+      {
+        "radius_mm": 4.0,
+        "face_count": 4
+      },
+      {
+        "radius_mm": 6.0,
+        "face_count": 4
+      },
+      {
+        "radius_mm": 8.0,
+        "face_count": 4
+      },
+      {
+        "radius_mm": 10.0,
+        "face_count": 8
+      },
+      {
+        "radius_mm": 12.0,
+        "face_count": 4
+      },
+      {
+        "radius_mm": 14.75,
+        "face_count": 2
+      },
+      {
+        "radius_mm": 18.0,
+        "face_count": 14
+      }
+    ],
+    "distinct_circular_edge_radii_mm": [
+      1.5,
+      2.5,
+      4.0,
+      4.5,
+      6.0,
+      8.0,
+      8.5,
+      9.5,
+      10.0,
+      12.0,
+      13.5,
+      14.75,
+      16.25
+    ],
+    "horizontal_planar_z_levels_mm": [
+      0.0,
+      16.0,
+      26.0,
+      142.0
+    ]
+  },
+  "slicer": null,
+  "generated_files": [
+    "projects/dumbbell_stand/.preview/preview.png",
+    "projects/dumbbell_stand/.preview/preview_engineering.png",
+    "projects/dumbbell_stand/.preview/report.json"
+  ]
+}

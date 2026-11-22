@@ -128,27 +128,62 @@ def _add_conditional_build_box(plotter: pv.Plotter, report: CadReport) -> None:
     )
 
 
+def _select_underside_camera_dir(report: CadReport) -> tuple[float, float, float]:
+    """Dynamically orient the underside (-Z) camera toward the primary overhang defect."""
+    overhang_markers = [m for m in report.defect_markers if "overhang" in m.category]
+    target = overhang_markers[0] if overhang_markers else (
+        report.defect_markers[0] if report.defect_markers else None
+    )
+    if target is None:
+        return (-1.05, -1.15, -0.75)
+
+    cx = (report.bbox_min[0] + report.bbox_max[0]) / 2.0
+    cy = (report.bbox_min[1] + report.bbox_max[1]) / 2.0
+    mx, my, _ = target.centroid_mm
+    nx, ny, _ = target.dominant_normal
+    cam_x = 1.05 if (nx > 0.15 or (abs(nx) <= 0.15 and mx > cx + 1.0)) else -1.05
+    cam_y = 1.15 if (ny > 0.15 or (abs(ny) <= 0.15 and my > cy + 1.0)) else -1.15
+    return (cam_x, cam_y, -0.75)
+
+
 def _add_3d_som_markers(plotter: pv.Plotter, report: CadReport) -> None:
-    """Overlay Set-of-Mark 3D callout badges [D1], [D2] at defect centroids."""
+    """Overlay offset Set-of-Mark 3D callout badges [D1], [D2] with leader lines."""
     if not report.defect_markers:
         return
-    r_pin = max(min(report.bbox_size) * 0.025, 0.7)
-    for m in report.defect_markers:
+    sx, sy, sz = report.bbox_size
+    r_pin = max(min(sx, sy, sz) * 0.022, 0.65)
+    cx = (report.bbox_min[0] + report.bbox_max[0]) / 2.0
+    cy = (report.bbox_min[1] + report.bbox_max[1]) / 2.0
+    offset_mag = max(max(sx, sy, sz) * 0.09, 4.0)
+
+    for idx, m in enumerate(report.defect_markers):
         is_crit = "critical" in m.category or m.severity == "FAIL"
         badge_bg = COLOR_BADGE_RED if is_crit else COLOR_BADGE_AMBER
         pin_color = COLOR_CRIT_RED if is_crit else COLOR_WARN_AMBER
-        pin_sphere = pv.Sphere(radius=r_pin, center=m.centroid_mm)
+        mx, my, mz = m.centroid_mm
+        pin_sphere = pv.Sphere(radius=r_pin, center=(mx, my, mz))
         plotter.add_mesh(pin_sphere, color=pin_color, lighting=False)
+
+        dir_x = 1.0 if mx >= cx else -1.0
+        dir_y = -1.0 if my <= cy else 1.0
+        dir_z = 0.85 if idx % 2 == 0 else -0.55
+        norm = math.sqrt(dir_x * dir_x + dir_y * dir_y + dir_z * dir_z)
+        lbl_pt = (
+            mx + offset_mag * dir_x / norm,
+            my + offset_mag * dir_y / norm,
+            mz + offset_mag * dir_z / norm,
+        )
+        plotter.add_mesh(pv.Line((mx, my, mz), lbl_pt), color=pin_color, line_width=2.0, lighting=False)
         plotter.add_point_labels(
-            points=np.array([m.centroid_mm], dtype=float),
-            labels=[f" {m.id}: {m.short_label} "],
+            points=np.array([lbl_pt], dtype=float),
+            labels=[f" {m.id} "],
             font_size=11,
             text_color="#FFFFFF",
             point_size=1,
             shape="rounded_rect",
             fill_shape=True,
             shape_color=badge_bg,
-            shape_opacity=0.92,
+            shape_opacity=0.94,
             always_visible=True,
             show_points=False,
         )
@@ -248,7 +283,7 @@ def render_sheet1_3d_overview(
         color=COLOR_EDGE_DARK,
     )
     plotter_dyn.add_axes()
-    _set_parallel_iso_camera(plotter, report, direction=(-1.05, -1.15, -0.75))
+    _set_parallel_iso_camera(plotter, report, direction=_select_underside_camera_dir(report))
 
     plotter.subplot(1, 1)
     wall_cmap = ListedColormap([COLOR_OK_GRAY, COLOR_WARN_AMBER, COLOR_CRIT_RED])
@@ -257,7 +292,7 @@ def render_sheet1_3d_overview(
     if clipped_solid.n_cells > 0:
         plotter.add_mesh(
             clipped_solid,
-            scalars="WallClass",
+            scalars="CutawayClass",
             cmap=wall_cmap,
             clim=[-0.5, 2.5],
             preference="cell",
@@ -328,7 +363,7 @@ def render_sheet1_3d_overview(
     _add_3d_som_markers(plotter, report)
     cut_title = (
         f"4. Cutaway A-A ({section_spec.axis_name}={section_spec.coord_mm:.1f}mm) "
-        f"| Wall (<0.8 Red, 0.8-1.6 Amber) & CoM"
+        f"| DFM Defects & CoM"
     )
     plotter.add_text(cut_title, position="upper_left", font_size=11, color=COLOR_EDGE_DARK)
     plotter_dyn.add_axes()

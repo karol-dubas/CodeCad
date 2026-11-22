@@ -115,21 +115,35 @@ def draw_ordinate_z_levels(
     """Draw non-overlapping ordinate Z-step level callouts on the right margin of XZ/YZ views."""
     if not z_levels:
         return
-    min_gap = max(max_span * 0.075, (v_max - v_min) * 0.085, 1.2)
-    selected: list[float] = []
+    deduped: list[float] = []
     for z in sorted(z_levels):
-        if not selected or abs(z - selected[-1]) >= min_gap:
-            selected.append(z)
+        if not deduped or abs(z - deduped[-1]) >= 0.4:
+            deduped.append(z)
         elif abs(z - v_max) < 1e-2:
-            selected[-1] = z
+            deduped[-1] = z
+
+    min_gap = max(max_span * 0.065, (v_max - v_min) * 0.075, 1.0)
+    label_ys = list(deduped)
+    for i in range(1, len(label_ys)):
+        if label_ys[i] - label_ys[i - 1] < min_gap:
+            label_ys[i] = label_ys[i - 1] + min_gap
 
     x_tick_start = u_max + max_span * 0.02
-    x_tick_end = u_max + max_span * 0.065
-    for z in selected:
-        ax.plot([x_tick_start, x_tick_end], [z, z], color="#475569", lw=0.85, ls="-", alpha=0.85, zorder=5)
+    x_tick_mid = u_max + max_span * 0.045
+    x_tick_end = u_max + max_span * 0.07
+    for z, y_lbl in zip(deduped, label_ys, strict=True):
+        ax.plot(
+            [x_tick_start, x_tick_mid, x_tick_end],
+            [z, z, y_lbl],
+            color="#475569",
+            lw=0.85,
+            ls="-",
+            alpha=0.85,
+            zorder=5,
+        )
         ax.text(
             x_tick_end + max_span * 0.01,
-            z,
+            y_lbl,
             f"Z={z:.1f}",
             fontsize=9.0,
             fontfamily="monospace",

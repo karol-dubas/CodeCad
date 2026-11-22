@@ -16,10 +16,12 @@ import pyvista_cad
 from preview_pipeline import (
     analyze_model,
     build_edge_polydata,
+    generate_root_readme,
     load_shape,
     render_sheet1_3d_overview,
     render_sheet2_2d_engineering,
     run_headless_slicer,
+    to_repo_relative_posix,
 )
 
 
@@ -91,15 +93,17 @@ def main() -> None:
         report.slicer = run_headless_slicer(shape, slicer_override=args.slicer_path)
 
     render_sheet1_3d_overview(shape, analyzed_poly, edge_mesh, report, section_spec, out_path)
-    report.generated_files.append(str(out_path))
+    report.generated_files.append(to_repo_relative_posix(out_path))
 
     render_sheet2_2d_engineering(shape, report, section_spec, engineering_path)
-    report.generated_files.append(str(engineering_path))
+    report.generated_files.append(to_repo_relative_posix(engineering_path))
 
-    report.generated_files.append(str(report_path))
+    report.generated_files.append(to_repo_relative_posix(report_path))
     report_path.write_text(
         json.dumps(report.to_dict(), indent=2, ensure_ascii=False), encoding="utf-8"
     )
+    readme_path = generate_root_readme()
+    report.generated_files.append(to_repo_relative_posix(readme_path))
 
     sx, sy, sz = report.bbox_size
     print(

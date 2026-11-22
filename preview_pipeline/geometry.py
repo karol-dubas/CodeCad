@@ -231,6 +231,35 @@ def extract_feature_catalog(shape: Part) -> dict[str, Any]:
     }
 
 
+def _clean_zero(val: float) -> float:
+    return 0.0 if abs(val) < 1e-4 else float(val)
+
+
+def _score_section_candidate(
+    shape: Part,
+    plane: Plane,
+    total_height: float,
+    is_center: bool,
+) -> tuple[int, int, int, float, float]:
+    """Score a vertical section plane; prefer full-height single-component cuts."""
+    try:
+        sec = b3d.section(shape, section_by=plane)
+        faces = sec.faces() if hasattr(sec, "faces") else []
+        total_area = float(sec.area)
+        if not faces or total_area < 1.0:
+            return (-1, 0, 0, 0.0, 0.0)
+        sec_bb = sec.bounding_box()
+        z_span_ratio = float(sec_bb.max.Z - sec_bb.min.Z) / max(total_height, 1e-3)
+        full_height = 1 if z_span_ratio >= 0.90 else 0
+        single_piece = 1 if len(faces) == 1 else 0
+        center_bonus = 1 if is_center else 0
+        max_face_area = max(float(f.area) for f in faces)
+        cohesion = max_face_area / max(total_area, 1e-6)
+        return (full_height, single_piece, center_bonus, cohesion, total_area)
+    except Exception:
+        return (-1, 0, 0, 0.0, 0.0)
+
+
 def select_smart_section_cut(
     shape: Part,
     bbox_min: tuple[float, float, float],
@@ -240,20 +269,25 @@ def select_smart_section_cut(
     """Choose optimal vertical section plane A-A for 3D cutaway and 2D hatched section."""
     xmin, ymin, zmin = bbox_min
     xmax, ymax, zmax = bbox_max
-    cx = (xmin + xmax) / 2.0
-    cy = (ymin + ymax) / 2.0
-    cz = (zmin + zmax) / 2.0
+    cx = _clean_zero((xmin + xmax) / 2.0)
+    cy = _clean_zero((ymin + ymax) / 2.0)
+    cz = _clean_zero((zmin + zmax) / 2.0)
     sx = max(xmax - xmin, 1.0)
     sy = max(ymax - ymin, 1.0)
+    sz = max(zmax - zmin, 1.0)
 
     if defect_markers:
         d1 = defect_markers[0]
         dx, dy, _ = d1.centroid_mm
         nx, ny, _ = d1.dominant_normal
-        dx_clamped = float(np.clip(dx, xmin + 0.06 * sx, xmax - 0.06 * sx))
-        dy_clamped = float(np.clip(dy, ymin + 0.06 * sy, ymax - 0.06 * sy))
+        dx_clamped = _clean_zero(float(np.clip(dx, xmin + 0.06 * sx, xmax - 0.06 * sx)))
+        dy_clamped = _clean_zero(float(np.clip(dy, ymin + 0.06 * sy, ymax - 0.06 * sy)))
 
-        use_x_cut = (abs(ny) >= abs(nx)) and (abs(dx - cx) >= 0.08 * sx)
+        if abs(nx) < 0.25 and abs(ny) < 0.25:
+            use_x_cut = (abs(dx - cx) / sx) >= (abs(dy - cy) / sy)
+        else:
+            use_x_cut = (abs(ny) >= abs(nx)) and (abs(dx - cx) >= 0.08 * sx)
+
         if use_x_cut:
             return SectionCutSpec(
                 axis_name="X",
@@ -276,43 +310,52 @@ def select_smart_section_cut(
             v_label="Z",
         )
 
-    if sx >= sy:
-        y_cut = cy
-        reason = "Center Plane (Y = 0)" if abs(cy) < 1e-2 else f"Mid-Plane (Y = {cy:.1f})"
-        try:
-            sec = b3d.section(shape, section_by=Plane.XZ.offset(y_cut))
-            if not sec.faces() or float(sec.area) < 1.0:
-                y_cut = cy - 0.22 * sy
-                reason = f"Feature Plane (Y = {y_cut:.1f})"
-        except Exception:
-            pass
+    candidates: list[tuple[str, float, str, bool]] = [
+        ("Y", cy, "Center Plane (Y = 0)" if abs(cy) < 1e-2 else f"Mid-Plane (Y = {cy:.1f})", True),
+        ("X", cx, "Center Plane (X = 0)" if abs(cx) < 1e-2 else f"Mid-Plane (X = {cx:.1f})", True),
+    ]
+    for f in shape.faces():
+        f_bb = f.bounding_box()
+        if zmax - 1.0 <= f_bb.max.Z and float(f.area) > 4.0:
+            fc = f.center()
+            fx = _clean_zero(float(np.clip(fc.X, xmin + 0.06 * sx, xmax - 0.06 * sx)))
+            fy = _clean_zero(float(np.clip(fc.Y, ymin + 0.06 * sy, ymax - 0.06 * sy)))
+            candidates.append(("X", fx, f"Feature Plane (X = {fx:.1f})", abs(fx - cx) < 1e-2))
+            candidates.append(("Y", fy, f"Feature Plane (Y = {fy:.1f})", abs(fy - cy) < 1e-2))
+
+    best_score: tuple[int, int, int, float, float] = (-2, 0, 0, 0.0, 0.0)
+    best_cand = candidates[0] if sx >= sy else candidates[1]
+    seen: set[tuple[str, float]] = set()
+    for axis_name, coord, reason, is_center in candidates:
+        key = (axis_name, round(coord, 1))
+        if key in seen:
+            continue
+        seen.add(key)
+        plane = Plane.YZ.offset(coord) if axis_name == "X" else Plane.XZ.offset(coord)
+        score = _score_section_candidate(shape, plane, sz, is_center)
+        if score > best_score:
+            best_score = score
+            best_cand = (axis_name, coord, reason, is_center)
+
+    axis_name, coord, reason, _ = best_cand
+    if axis_name == "X":
         return SectionCutSpec(
-            axis_name="Y",
-            coord_mm=float(y_cut),
+            axis_name="X",
+            coord_mm=coord,
             reason=reason,
-            plane=Plane.XZ.offset(float(y_cut)),
-            normal=(0.0, 1.0, 0.0),
-            origin=(cx, float(y_cut), cz),
-            u_label="X",
+            plane=Plane.YZ.offset(coord),
+            normal=(1.0, 0.0, 0.0),
+            origin=(coord, cy, cz),
+            u_label="Y",
             v_label="Z",
         )
-
-    x_cut = cx
-    reason = "Center Plane (X = 0)" if abs(cx) < 1e-2 else f"Mid-Plane (X = {cx:.1f})"
-    try:
-        sec = b3d.section(shape, section_by=Plane.YZ.offset(x_cut))
-        if not sec.faces() or float(sec.area) < 1.0:
-            x_cut = cx + 0.22 * sx
-            reason = f"Feature Plane (X = {x_cut:.1f})"
-    except Exception:
-        pass
     return SectionCutSpec(
-        axis_name="X",
-        coord_mm=float(x_cut),
+        axis_name="Y",
+        coord_mm=coord,
         reason=reason,
-        plane=Plane.YZ.offset(float(x_cut)),
-        normal=(1.0, 0.0, 0.0),
-        origin=(float(x_cut), cy, cz),
-        u_label="Y",
+        plane=Plane.XZ.offset(coord),
+        normal=(0.0, 1.0, 0.0),
+        origin=(cx, coord, cz),
+        u_label="X",
         v_label="Z",
     )

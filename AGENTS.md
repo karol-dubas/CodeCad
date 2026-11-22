@@ -16,4 +16,5 @@
 - **CAD & Compliance Verification Pipeline**:
   - After every geometry change, run `uv run preview.py <script_path>` (add `--slice` for OrcaSlicer G-code telemetry).
   - Read `<project_dir>/.preview/report.json` **first** for exact numbers and `PASS`/`WARN`/`FAIL` checks (Zero-OCR policy), then visually inspect `preview.png` and `preview_engineering.png`.
+  - If the preview files lack a view or perspective needed for inspection, fail to reveal a potential issue, or anything in the preview pipeline works incorrectly, inform the user immediately.
   - After completing workspace edits, run a fresh-context `Repo Compliance Reviewer` subagent per `.agents/skills/repo-reviewer/SKILL.md`.

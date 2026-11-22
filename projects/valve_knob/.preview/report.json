@@ -1,0 +1,234 @@
+{
+  "part_name": "valve_knob",
+  "script_path": "projects/valve_knob/valve_knob.py",
+  "timestamp": "2026-11-22T15:33:09",
+  "overall_status": "PASS",
+  "checks": {
+    "geometry_sanity": {
+      "status": "PASS",
+      "message": "Valid single-solid manifold B-Rep with non-zero volume.",
+      "metrics": {
+        "valid_brep": true,
+        "solid_count": 1,
+        "volume_mm3": 5977.87
+      }
+    },
+    "build_volume": {
+      "status": "PASS",
+      "message": "Fits comfortably inside Bambu Lab P1S build volume (max occupancy 15.2%).",
+      "metrics": {
+        "size_mm": [
+          39.0,
+          20.5,
+          18.0
+        ],
+        "occupancy_pct": [
+          15.2,
+          8.0,
+          7.0
+        ]
+      }
+    },
+    "bed_adhesion": {
+      "status": "PASS",
+      "message": "Flat bottom at Z=-0.00 mm with 4.07 cm^2 bed contact area.",
+      "metrics": {
+        "contact_area_cm2": 4.071,
+        "z_min_mm": -0.0
+      }
+    },
+    "build_plate_fillets": {
+      "status": "PASS",
+      "message": "No overhanging fillets detected on the Z_min build plate interface.",
+      "metrics": {
+        "fillet_face_count": 0
+      }
+    },
+    "overhangs": {
+      "status": "PASS",
+      "message": "Support-free FDM geometry (0.00 cm^2 >60 deg, 0.00 cm^2 45-60 deg).",
+      "metrics": {
+        "red_gt_60_cm2": 0.0,
+        "amber_45_60_cm2": 0.0
+      }
+    },
+    "wall_thickness": {
+      "status": "PASS",
+      "message": "Robust wall thickness (min=2.75 mm, P5=6.94 mm, median=10.33 mm).",
+      "metrics": {
+        "min_mm": 2.75,
+        "p5_mm": 6.94,
+        "p50_mm": 10.33
+      }
+    },
+    "stability": {
+      "status": "PASS",
+      "message": "Stable upright posture (tip margin: 9.4 mm).",
+      "metrics": {
+        "tip_margin_mm": 9.45
+      }
+    }
+  },
+  "defect_markers": [],
+  "section_cut_a_a": {
+    "plane_axis": "Y",
+    "coordinate_mm": 0.0,
+    "projection_axes": "XZ",
+    "selection_reason": "Center Plane (Y = 0)"
+  },
+  "geometry": {
+    "valid_brep": true,
+    "solid_count": 1,
+    "face_count": 62,
+    "edge_count": 140,
+    "volume_mm3": 5977.87,
+    "volume_cm3": 5.978,
+    "surface_area_mm2": 2648.76,
+    "surface_area_cm2": 26.488
+  },
+  "bounding_box": {
+    "min_mm": [
+      -19.5,
+      -10.25,
+      -0.0
+    ],
+    "max_mm": [
+      19.5,
+      10.25,
+      18.0
+    ],
+    "size_mm": [
+      39.0,
+      20.5,
+      18.0
+    ],
+    "printer_name": "Bambu Lab P1S",
+    "printer_build_volume_mm": [
+      256.0,
+      256.0,
+      256.0
+    ],
+    "margin_to_limits_mm": [
+      217.0,
+      235.5,
+      238.0
+    ],
+    "occupancy_pct": [
+      15.2,
+      8.0,
+      7.0
+    ],
+    "near_or_exceeds_limits": false
+  },
+  "bed_adhesion": {
+    "z_min_mm": -0.0,
+    "bed_flatness_at_z0": true,
+    "contact_area_mm2": 407.14,
+    "contact_area_cm2": 4.071,
+    "fillets_touching_build_plate_count": 0,
+    "fillets_touching_build_plate_radii_mm": []
+  },
+  "overhangs": {
+    "moderate_45_to_60_deg_mm2": 0.0,
+    "moderate_45_to_60_deg_cm2": 0.0,
+    "critical_gt_60_deg_mm2": 0.0,
+    "critical_gt_60_deg_cm2": 0.0
+  },
+  "wall_thickness": {
+    "thresholds_mm": {
+      "critical_red_below": 0.8,
+      "warning_amber_below": 1.6
+    },
+    "min_mm": 2.749,
+    "percentiles_mm": {
+      "p5": 6.936,
+      "p10": 7.599,
+      "p50_median": 10.333,
+      "p90": 17.451,
+      "max": 29.624
+    },
+    "distribution_area_pct": {
+      "red_lt_0.8mm": 0.0,
+      "amber_0.8_to_1.6mm": 0.0,
+      "ok_gt_1.6mm": 100.0
+    }
+  },
+  "stability": {
+    "center_of_mass_mm": [
+      0.0,
+      -0.0,
+      6.918
+    ],
+    "footprint_bounds_xy_mm": [
+      -18.7,
+      18.7,
+      -9.45,
+      9.45
+    ],
+    "min_tipping_margin_mm": 9.45
+  },
+  "features": {
+    "cylindrical_diameters_mm": [
+      {
+        "diameter_mm": 13.0,
+        "face_count": 1
+      },
+      {
+        "diameter_mm": 18.5,
+        "face_count": 1
+      }
+    ],
+    "fillet_and_arc_radii_mm": [
+      {
+        "radius_mm": 0.4,
+        "face_count": 4
+      },
+      {
+        "radius_mm": 1.2,
+        "face_count": 4
+      },
+      {
+        "radius_mm": 4.25,
+        "face_count": 2
+      },
+      {
+        "radius_mm": 5.0,
+        "face_count": 4
+      },
+      {
+        "radius_mm": 10.25,
+        "face_count": 2
+      }
+    ],
+    "distinct_circular_edge_radii_mm": [
+      0.4,
+      0.9,
+      1.2,
+      3.05,
+      3.45,
+      4.25,
+      5.0,
+      5.8,
+      6.2,
+      6.5,
+      7.0,
+      8.75,
+      9.25,
+      9.45,
+      10.25
+    ],
+    "horizontal_planar_z_levels_mm": [
+      0.0,
+      3.0,
+      10.0,
+      13.0,
+      18.0
+    ]
+  },
+  "slicer": null,
+  "generated_files": [
+    "projects/valve_knob/.preview/preview.png",
+    "projects/valve_knob/.preview/preview_engineering.png",
+    "projects/valve_knob/.preview/report.json"
+  ]
+}

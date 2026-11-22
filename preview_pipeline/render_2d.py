@@ -73,8 +73,13 @@ def _render_clean_hlr_view(
     if not all_u or not all_v:
         return
 
-    u_min, u_max = min(all_u), max(all_u)
-    v_min, v_max = min(all_v), max(all_v)
+    axis_idx = {"X": 0, "Y": 1, "Z": 2}
+    ui = axis_idx[u_label]
+    vi = axis_idx[v_label]
+    u_min = float(report.bbox_min[ui])
+    u_max = float(report.bbox_max[ui])
+    v_min = float(report.bbox_min[vi])
+    v_max = float(report.bbox_max[vi])
     u_span = max(u_max - u_min, 1.0)
     v_span = max(v_max - v_min, 1.0)
     max_span = max(u_span, v_span)
@@ -398,4 +403,4 @@ def render_sheet2_2d_engineering(
 
     fig.savefig(str(out_path), format="png", dpi=130)
     plt.close(fig)
-    crop_whitespace_png(out_path)
+    crop_whitespace_png(out_path, target_aspect=6.0 / 5.0)

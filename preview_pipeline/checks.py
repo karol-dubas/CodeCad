@@ -22,8 +22,12 @@ def build_defect_markers(
     wall_amber_pct: float,
     wall_p5: float,
     amber_cm2: float,
+    wall_red_pct: float = 0.0,
+    red_cm2: float = 0.0,
 ) -> list[DefectMarker]:
     markers: list[DefectMarker] = []
+    wall_crit_sev = "FAIL" if (wall_p5 < WALL_CRIT_MM or wall_red_pct > 5.0) else "WARN"
+    overhang_crit_sev = "FAIL" if red_cm2 > 10.0 else "WARN"
 
     def _add(
         category: str,
@@ -54,10 +58,16 @@ def build_defect_markers(
         )
 
     for cl in wall_crit_clusters[:2]:
-        _add("thin_wall_critical", "WARN", "Wall <0.8mm", cl, "Critical thin wall <0.8 mm")
+        _add("thin_wall_critical", wall_crit_sev, "Wall <0.8mm", cl, "Critical thin wall <0.8 mm")
     for cl in red_clusters[:2]:
         if cl["area_cm2"] >= 0.10:
-            _add("overhang_critical", "WARN", "Overhang >60°", cl, "Critical overhang/bridge >60 deg")
+            _add(
+                "overhang_critical",
+                overhang_crit_sev,
+                "Overhang >60°",
+                cl,
+                "Critical overhang/bridge >60 deg",
+            )
     if not markers:
         for cl in wall_warn_clusters[:1]:
             if wall_amber_pct > 10.0 or wall_p5 < WALL_WARN_MM:
@@ -195,7 +205,13 @@ def evaluate_checks(
             metrics={"fillet_face_count": 0},
         )
 
-    if red_cm2 > 2.5:
+    if red_cm2 > 10.0:
+        checks["overhangs"] = CheckResult(
+            status="FAIL",
+            message=f"Severe unsupported overhangs/bridges >60 deg ({red_cm2:.2f} cm^2 red, {amber_cm2:.2f} cm^2 amber).",
+            metrics={"red_gt_60_cm2": round(red_cm2, 3), "amber_45_60_cm2": round(amber_cm2, 3)},
+        )
+    elif red_cm2 > 2.5:
         checks["overhangs"] = CheckResult(
             status="WARN",
             message=f"Critical overhangs/bridges >60 deg detected ({red_cm2:.2f} cm^2 red, {amber_cm2:.2f} cm^2 amber).",
@@ -214,7 +230,20 @@ def evaluate_checks(
             metrics={"red_gt_60_cm2": round(red_cm2, 3), "amber_45_60_cm2": round(amber_cm2, 3)},
         )
 
-    if wall_p5 < WALL_CRIT_MM or wall_red_pct > 2.0 or len(wall_crit_clusters) > 0:
+    if wall_p5 < WALL_CRIT_MM or wall_red_pct > 5.0:
+        checks["wall_thickness"] = CheckResult(
+            status="FAIL",
+            message=(
+                f"Critically thin walls <{WALL_CRIT_MM} mm "
+                f"(min={wall_min:.2f} mm, P5={wall_p5:.2f} mm, {wall_red_pct:.1f}% area <0.8 mm)."
+            ),
+            metrics={
+                "min_mm": round(wall_min, 2),
+                "p5_mm": round(wall_p5, 2),
+                "red_area_pct": round(wall_red_pct, 2),
+            },
+        )
+    elif wall_red_pct > 2.0 or len(wall_crit_clusters) > 0:
         checks["wall_thickness"] = CheckResult(
             status="WARN",
             message=(

@@ -83,8 +83,12 @@ def load_shape(script_path: Path, var_name: str | None) -> Part:
     return _coerce_to_part(candidate, script_path)
 
 
-def crop_whitespace_png(image_path: Path, pad_px: int = 18) -> None:
-    """Losslessly trim excess outer background margins to maximize VLM pixel density."""
+def crop_whitespace_png(
+    image_path: Path,
+    pad_px: int = 18,
+    target_aspect: float | None = None,
+) -> None:
+    """Losslessly trim excess outer background margins and optionally pad to target_aspect."""
     if not image_path.exists():
         return
     with Image.open(image_path) as img:
@@ -102,4 +106,24 @@ def crop_whitespace_png(image_path: Path, pad_px: int = 18) -> None:
         right = min(rgb.width, bbox[2] + pad_px)
         bottom = min(rgb.height, bbox[3] + pad_px)
         cropped = img.crop((left, top, right, bottom))
+
+        if target_aspect is not None and target_aspect > 0:
+            cw, ch = cropped.size
+            target_w = max(cw, round(ch * target_aspect))
+            target_h = max(ch, round(cw / target_aspect))
+            if target_w != cw or target_h != ch:
+                padded = Image.new(cropped.mode, (target_w, target_h), corner_pixel)
+                padded.paste(cropped, ((target_w - cw) // 2, (target_h - ch) // 2))
+                cropped = padded
+
         cropped.save(image_path, format="PNG", optimize=True)
+
+
+def to_repo_relative_posix(path: Path) -> str:
+    """Return a POSIX path relative to the repository root when possible."""
+    repo_root = Path(__file__).resolve().parent.parent
+    resolved = path.resolve()
+    try:
+        return resolved.relative_to(repo_root).as_posix()
+    except ValueError:
+        return path.as_posix()
