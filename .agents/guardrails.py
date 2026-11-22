@@ -125,12 +125,17 @@ def _iter_repo_py_files(root: Path) -> list[Path]:
 
 def _iter_cad_project_scripts(root: Path) -> list[Path]:
     scripts: list[Path] = []
-    for child in sorted(root.iterdir()):
-        if not child.is_dir() or child.name.startswith(".") or child.name in SKIP_DIRS:
-            continue
-        candidate = child / f"{child.name}.py"
-        if candidate.is_file():
-            scripts.append(candidate)
+    search_roots = [root]
+    projects_dir = root / "projects"
+    if projects_dir.is_dir():
+        search_roots.append(projects_dir)
+    for base in search_roots:
+        for child in sorted(base.iterdir()):
+            if not child.is_dir() or child.name.startswith(".") or child.name in SKIP_DIRS:
+                continue
+            candidate = child / f"{child.name}.py"
+            if candidate.is_file():
+                scripts.append(candidate)
     return scripts
 
 
